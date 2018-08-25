@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -55,6 +57,8 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             return new ChannelViewHolder(mContext,mLayoutInflater.inflate(R.layout.channel_item,null));
         }else if (viewType==ACT){
             return new ActViewHolder(mContext,mLayoutInflater.inflate(R.layout.act_item,null));
+        }else if (viewType==SECKILL){
+            return new SeckillViewHolder(mContext,mLayoutInflater.inflate(R.layout.seckill_item,null));
         }
         return null;
     }
@@ -70,6 +74,34 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
         }else if (getItemViewType(position)==ACT){
             ActViewHolder actViewHolder= (ActViewHolder) holder;
             actViewHolder.setData(resultBean.getAct_info());
+        }else if (getItemViewType(position)==SECKILL){
+            SeckillViewHolder seckillViewHolder= (SeckillViewHolder) holder;
+            seckillViewHolder.setData(resultBean.getSeckill_info());
+        }
+    }
+
+    class SeckillViewHolder extends RecyclerView.ViewHolder{
+        private final Context mContext;
+        private RecyclerView rv_seckill;
+        private TextView tv_more_seckill;
+        private TextView tv_time_seckill;
+        private SeckillRecyclerViewAdapter adapter;
+        public SeckillViewHolder(Context mContext, View itemView) {
+            super( itemView);
+            this.mContext=mContext;
+             tv_time_seckill = (TextView) itemView.findViewById(R.id.tv_time_seckill);
+            tv_more_seckill = (TextView) itemView.findViewById(R.id.tv_more_seckill);
+            rv_seckill = (RecyclerView) itemView.findViewById(R.id.rv_seckill);
+        }
+
+        public void setData(ResultBeanData.ResultBean.SeckillInfoBean seckill_info) {
+            //得到数据 设置数据
+            adapter=new SeckillRecyclerViewAdapter(mContext,seckill_info.getList());
+            rv_seckill.setAdapter(adapter);
+
+            //设置布局管理器
+            rv_seckill.setLayoutManager(new LinearLayoutManager(mContext,LinearLayoutManager.HORIZONTAL,false));
+
         }
     }
     class ActViewHolder extends RecyclerView.ViewHolder{
@@ -210,6 +242,6 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemCount() {
         //开发过程中从1-->2
-        return 3;
+        return 4;
     }
 }
