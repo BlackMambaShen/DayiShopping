@@ -1,6 +1,8 @@
 package home.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -23,8 +25,12 @@ import com.youth.banner.Transformer;
 import com.youth.banner.listener.OnBannerClickListener;
 import com.youth.banner.listener.OnLoadImageListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.SimpleFormatter;
 
 import home.bean.ResultBeanData;
 import utils.Constants;
@@ -59,6 +65,10 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             return new ActViewHolder(mContext,mLayoutInflater.inflate(R.layout.act_item,null));
         }else if (viewType==SECKILL){
             return new SeckillViewHolder(mContext,mLayoutInflater.inflate(R.layout.seckill_item,null));
+        }else if (viewType==RECOMMEND){
+            return new RecommendViewHolder(mContext,mLayoutInflater.inflate(R.layout.recommend_item,null));
+        }else if (viewType==HOT){
+            return new HotViewHolder(mContext,mLayoutInflater.inflate(R.layout.hot_item,null));
         }
         return null;
     }
@@ -77,8 +87,65 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
         }else if (getItemViewType(position)==SECKILL){
             SeckillViewHolder seckillViewHolder= (SeckillViewHolder) holder;
             seckillViewHolder.setData(resultBean.getSeckill_info());
+        }else if (getItemViewType(position)==RECOMMEND){
+            RecommendViewHolder recommendViewHolder= (RecommendViewHolder) holder;
+            recommendViewHolder.setData(resultBean.getRecommend_info());
+        }else if (getItemViewType(position)==HOT){
+            HotViewHolder hotViewHolder= (HotViewHolder) holder;
+            hotViewHolder.setData(resultBean.getHot_info());
         }
     }
+    class HotViewHolder extends RecyclerView.ViewHolder{
+
+        private  Context mContext;
+        private TextView tv_more_hot;
+        private GridView gv_hot;
+        private HotGridViewAdapter adapter;
+        public HotViewHolder(final Context mContext, View itemView) {
+            super(itemView);
+            this.mContext=mContext;
+             tv_more_hot = (TextView)itemView.findViewById(R.id.tv_more_hot);
+            gv_hot = (GridView)itemView.findViewById(R.id.gv_hot);
+            gv_hot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        public void setData(List<ResultBeanData.ResultBean.HotInfoBean> hot_info) {
+            adapter=new HotGridViewAdapter(mContext,hot_info);
+            gv_hot.setAdapter(adapter);
+        }
+    }
+    class RecommendViewHolder extends RecyclerView.ViewHolder{
+
+        private  GridView gv_recommend;
+        private  Context mContext;
+        private TextView tv_more_recommend;
+        private RecommendGridViewAdapter adapter;
+        public RecommendViewHolder(final Context mContext, View itemView) {
+            super(itemView);
+            this.mContext=mContext;
+             tv_more_recommend =(TextView) itemView.findViewById(R.id.tv_more_recommend);
+            gv_recommend =(GridView) itemView.findViewById(R.id.gv_recommend);
+            gv_recommend.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        public void setData(List<ResultBeanData.ResultBean.RecommendInfoBean> recommend_info) {
+            //1.有数据了
+            //2.设置适配器
+            adapter=new RecommendGridViewAdapter(mContext,recommend_info);
+            gv_recommend.setAdapter(adapter);
+        }
+    }
+
 
     class SeckillViewHolder extends RecyclerView.ViewHolder{
         private final Context mContext;
@@ -86,6 +153,25 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
         private TextView tv_more_seckill;
         private TextView tv_time_seckill;
         private SeckillRecyclerViewAdapter adapter;
+        private long dt=0;
+        @SuppressLint("HandlerLeak")
+        private android.os.Handler handler=new android.os.Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                dt=dt-1000;
+                SimpleDateFormat format=new SimpleDateFormat("HH:mm:ss");
+                String time = format.format(new Date(dt));
+                tv_time_seckill.setText(time);
+                handler.removeMessages(0);
+                handler.sendEmptyMessageDelayed(0,1000);
+                if (dt<0){
+                    //把消息移除
+                    handler.removeCallbacksAndMessages(null);
+                }
+            }
+        };
+
         public SeckillViewHolder(Context mContext, View itemView) {
             super( itemView);
             this.mContext=mContext;
@@ -102,6 +188,12 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             //设置布局管理器
             rv_seckill.setLayoutManager(new LinearLayoutManager(mContext,LinearLayoutManager.HORIZONTAL,false));
 
+            //秒杀倒计时  毫秒值
+            dt=Integer.valueOf(seckill_info.getEnd_time())-Integer.valueOf(seckill_info.getStart_time());
+            SimpleDateFormat format=new SimpleDateFormat("HH:mm:ss");
+            String time = format.format(new Date(dt));
+            tv_time_seckill.setText(time);
+            handler.sendEmptyMessageDelayed(0,1000);
         }
     }
     class ActViewHolder extends RecyclerView.ViewHolder{
@@ -242,6 +334,6 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemCount() {
         //开发过程中从1-->2
-        return 4;
+        return 6;
     }
 }

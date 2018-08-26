@@ -39,8 +39,8 @@ public class SeckillRecyclerViewAdapter extends RecyclerView.Adapter<SeckillRecy
         //根据位置得到对应的数据
         ResultBeanData.ResultBean.SeckillInfoBean.ListBean listBean=list.get(position);
         Glide.with(mContext).load(Constants.IMAGE_URL+listBean.getFigure()).into(holder.iv_figure);
-        holder.tv_cover_price.setText(listBean.getCover_price());
-        holder.tv_origin_price.setText(listBean.getOrigin_price());
+        holder.tv_cover_price.setText("$"+listBean.getCover_price());
+        holder.tv_origin_price.setText("$"+listBean.getOrigin_price());
     }
 
     @Override

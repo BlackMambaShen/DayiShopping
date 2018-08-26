@@ -79,8 +79,13 @@ public class HomeFragment extends BaseFragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String result = response.body().string();
-                processData(result);
+                final String result = response.body().string();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        processData(result);
+                    }
+                });
             }
         });
     }
@@ -92,6 +97,7 @@ public class HomeFragment extends BaseFragment {
             //有数据
             //设置适配器
              adpter = new HomeFragmentAdapter(mContext,resultBean);
+
              rv_home.setAdapter(adpter);
              rv_home.setLayoutManager(new GridLayoutManager(mContext,1));
         }else {
