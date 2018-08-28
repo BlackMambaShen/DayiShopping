@@ -2,6 +2,7 @@ package home.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.liang.dayishopping.R;
+import com.example.liang.dayishopping.app.GoodsInfoActivity;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
@@ -29,9 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.SimpleFormatter;
 
+import home.bean.GoodsBean;
 import home.bean.ResultBeanData;
 import utils.Constants;
 
@@ -45,6 +46,7 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
     public static final int SECKILL=3;
     public static final int RECOMMEND=4;
     public static final int HOT=5;
+    private static final String GOODS_BEAN = "goodsBean";
     private  LayoutInflater mLayoutInflater;
     private  Context mContext;
     private  ResultBeanData.ResultBean resultBean;
@@ -106,17 +108,24 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             this.mContext=mContext;
              tv_more_hot = (TextView)itemView.findViewById(R.id.tv_more_hot);
             gv_hot = (GridView)itemView.findViewById(R.id.gv_hot);
+        }
+
+        public void setData(final List<ResultBeanData.ResultBean.HotInfoBean> hot_info) {
+            adapter=new HotGridViewAdapter(mContext,hot_info);
+            gv_hot.setAdapter(adapter);
             gv_hot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
+                    ResultBeanData.ResultBean.HotInfoBean hotInfoBean = hot_info.get(position);
+                    GoodsBean goodsBean=new GoodsBean();
+                    goodsBean.setCover_price(hotInfoBean.getCover_price());
+                    goodsBean.setFigure(hotInfoBean.getFigure());
+                    goodsBean.setName(hotInfoBean.getName());
+                    goodsBean.setProduct_id(hotInfoBean.getProduct_id());
+                    startGoodsInfoActivity(goodsBean);
                 }
             });
-        }
-
-        public void setData(List<ResultBeanData.ResultBean.HotInfoBean> hot_info) {
-            adapter=new HotGridViewAdapter(mContext,hot_info);
-            gv_hot.setAdapter(adapter);
         }
     }
     class RecommendViewHolder extends RecyclerView.ViewHolder{
@@ -130,19 +139,26 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             this.mContext=mContext;
              tv_more_recommend =(TextView) itemView.findViewById(R.id.tv_more_recommend);
             gv_recommend =(GridView) itemView.findViewById(R.id.gv_recommend);
-            gv_recommend.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
-                }
-            });
         }
 
-        public void setData(List<ResultBeanData.ResultBean.RecommendInfoBean> recommend_info) {
+        public void setData(final List<ResultBeanData.ResultBean.RecommendInfoBean> recommend_info) {
             //1.有数据了
             //2.设置适配器
             adapter=new RecommendGridViewAdapter(mContext,recommend_info);
             gv_recommend.setAdapter(adapter);
+            gv_recommend.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
+                    ResultBeanData.ResultBean.RecommendInfoBean recommendInfoBean=recommend_info.get(position);
+                    GoodsBean goodsBean=new GoodsBean();
+                    goodsBean.setCover_price(recommendInfoBean.getCover_price());
+                    goodsBean.setFigure(recommendInfoBean.getFigure());
+                    goodsBean.setName(recommendInfoBean.getName());
+                    goodsBean.setProduct_id(recommendInfoBean.getProduct_id());
+                    startGoodsInfoActivity(goodsBean);
+                }
+            });
         }
     }
 
@@ -284,6 +300,11 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                 String imageUrl = banner_info.get(i).getImage();
                 imagesUrl.add(imageUrl);
             }
+//             int[]arr={R.drawable.pre19,R.drawable.after19,R.drawable.air};
+////            List<Integer> images=new ArrayList<>();
+////            for (int i = 0; i <arr.length ; i++) {
+////                images.add(arr[i]);
+////            }
             //设置循环指示点
             banner.setBannerStyle(BannerConfig.CIRCLE_INDICATOR);
             //手风琴
@@ -294,15 +315,22 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                     Glide.with(mContext).load(Constants.IMAGE_URL+url).into(view);
                 }
             });
-
             //设置item的点击事件
             banner.setOnBannerClickListener(new OnBannerClickListener() {
                 @Override
                 public void OnBannerClick(int position) {
                     Toast.makeText(mContext, "position="+position, Toast.LENGTH_SHORT).show();
+//                    startGoodsInfoActivity(goodsBean);
                 }
             });
         }
+    }
+
+    //启动商品详情页面
+    private void startGoodsInfoActivity(GoodsBean goodsBean) {
+        Intent intent=new Intent(mContext, GoodsInfoActivity.class);
+        intent.putExtra(GOODS_BEAN,goodsBean);
+        mContext.startActivity(intent);
     }
 
 

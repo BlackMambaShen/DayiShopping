@@ -99,7 +99,22 @@ public class HomeFragment extends BaseFragment {
              adpter = new HomeFragmentAdapter(mContext,resultBean);
 
              rv_home.setAdapter(adpter);
-             rv_home.setLayoutManager(new GridLayoutManager(mContext,1));
+            GridLayoutManager layoutManager = new GridLayoutManager(mContext, 1);
+            //设置跨度大小滑动监听
+            layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if (position<=4){
+                        //隐藏按钮
+                        ib_top.setVisibility(View.GONE);
+                    }else {
+                        //显示按钮
+                        ib_top.setVisibility(View.VISIBLE);
+                    }
+                    return 1;
+                }
+            });
+            rv_home.setLayoutManager(layoutManager);
         }else {
             //没有数据
         }
